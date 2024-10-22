@@ -1,5 +1,3 @@
-<!-- resources/views/home.blade.php -->
-
 @extends('layout')
 
 @section('title', 'Home Page')

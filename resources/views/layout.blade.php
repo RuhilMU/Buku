@@ -11,6 +11,7 @@
         <nav>
             <a href="/">Home</a>
             <a href="/about">About</a>
+            <a href="/buku">Daftar Buku</a>
         </nav>
     </header>
 

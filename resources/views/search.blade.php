@@ -7,24 +7,29 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <title>Buku</title>
-</head> 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
 <body>
-<div class="container mt-4">
-        @if(Session::has('pesandelete'))
+    <div class="container mt-4">
+        @if (Session::has('pesan'))
             <div class="alert alert-success">
-                {{ Session::get('pesandelete') }}
+                {{ session::get('pesan') }}
             </div>
         @endif
-        @if(Session::has('pesanupdate'))
-            <div class="alert alert-success">
-                {{ Session::get('pesanupdate') }}
+
+
+        @if (count($data_buku))
+            <div class="alert alert-success">Ditemukan <strong>{{ count($data_buku) }}</strong> data dengan
+                kata: <h4>{{ $cari }}</h4>
+                <a href="/buku" class="btn btn-warning">Kembali</a>
+            </div>
+        @else
+            <div class="alert alert-warning">
+                <h4>Data {{ $cari }} tidak ditemukan</h4>
+                <a href="/buku" class="btn btn-warning">Kembali</a>
             </div>
         @endif
-        @if (Session::has('pesansuccess'))
-            <div class="alert alert-success">
-                {{ session::get('pesansuccess') }}
-            </div>
-        @endif
+
         <div class="d-flex justify-content-between mb-3">
             <h1>Daftar Buku</h1>
             <a href="{{ route('create')}}" class="btn btn-primary float-end" style=" display:inline; margin-top: 10px; margin-bottom:10px ; float: right;margin-right:10px;">Tambah Buku</a>
@@ -43,9 +48,9 @@
                 <th>Harga</th>
                 <th>Aksi</th>
             </tr>
-        </thead>
-        <tbody>
-            @foreach($data_buku as $index => $buku)
+            </thead>
+            <tbody>
+                @foreach($data_buku as $index => $buku)
                 <tr>
                     <td>{{ $index+1 }}</td>
                     <td>{{ $buku->judul }}</td>
@@ -66,17 +71,9 @@
                     </td>
                 </tr>
             @endforeach
-        </tbody>
-        <tr>
-            <td colspan="4">
-                <b>Total Harga:</b>
-            </td>
-            <td colspan="2">
-                Rp. {{ number_format($total_harga, 2, ',', '.') }}
-            </td>
-        </tr>
-    </table>
-    <div>{{ $data_buku->links('pagination::bootstrap-5') }}</div>
-    <div><strong>Jumlah Buku: {{ $jumlah_buku }}</strong></div>
+            </tbody>
+        </table>
+        <div><strong>Jumlah Buku: {{ count($data_buku) }} </strong></div>
+    </div>
 </body>
 </html>
