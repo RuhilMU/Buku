@@ -1,12 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Buku</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
+@extends('layouts.app')
+
+@section('content')
     <div class="container mt-5">
         @if (count($errors) > 0)
             <ul class="alert alert-danger">
@@ -39,5 +33,4 @@
             <a href="{{ url('/buku') }}" class="btn btn-secondary">Kembali</a>
         </form>
     </div>
-</body>
-</html>
+@endsection

@@ -1,14 +1,6 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <title>Buku</title>
-</head> 
-<body>
+@extends('layouts.app')
+
+@section('content')
 <div class="container mt-4">
         @if(Session::has('pesandelete'))
             <div class="alert alert-success">
@@ -25,10 +17,14 @@
                 {{ session::get('pesansuccess') }}
             </div>
         @endif
+
+        @if (Auth::User()->level == 'admin')
         <div class="d-flex justify-content-between mb-3">
             <h1>Daftar Buku</h1>
             <a href="{{ route('create')}}" class="btn btn-primary float-end" style=" display:inline; margin-top: 10px; margin-bottom:10px ; float: right;margin-right:10px;">Tambah Buku</a>
-        </div>    
+        </div>
+        @endif
+
     <form action="{{ route('search') }}" method="GET">@csrf
         <input type="text" name="kata" class="form-control" placeholder="Search..." style="width: 30%; display: inline;
         margin-top: 10px; margin-bottom: 10px; float: right;">
@@ -52,6 +48,7 @@
                     <td>{{ $buku->penulis }}</td>
                     <td>{{ $buku->tgl_terbit->format('Y-m-d') }}</td>
                     <td>{{ "Rp. ".number_format($buku->harga, 0, ',','.') }}</td>
+                    @if (Auth::User()->level == 'admin')
                     <td>
                         <form method="post" action="{{ route('edit', $buku->id) }}" style="display:inline;">
                             @csrf
@@ -64,6 +61,9 @@
                             <button onclick="return confirm('Yakin di Hapus boi?')" type="submit" class="btn btn-danger">Hapus</button>
                         </form>
                     </td>
+                    @else
+                        <td></td>
+                    @endif
                 </tr>
             @endforeach
         </tbody>
@@ -78,5 +78,4 @@
     </table>
     <div>{{ $data_buku->links('pagination::bootstrap-5') }}</div>
     <div><strong>Jumlah Buku: {{ $jumlah_buku }}</strong></div>
-</body>
-</html>
+    @endsection

@@ -18,15 +18,30 @@ Route::get('/about', function () {
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/mahasiswa', [MahaController::class, 'index']);
 
-Route::get('/buku', [BukuController::class, 'index']);
+Route::middleware('auth')->group(function () {
+    Route::get('/buku', [BukuController::class, 'index']);
+    Route::get('/buku/search', [BukuController::class, 'search'])->name('search');
 
-Route::get('/buku/create', [BukuController::class, 'create'])->name('create');
-Route::post('/buku', [BukuController::class, 'store'])->name('store');
+    Route::middleware(['auth', 'admin'])->group(function () {
+        Route::get('/buku/create', [BukuController::class, 'create'])->name('create');
+        Route::post('/buku', [BukuController::class, 'store'])->name('store');
+        Route::delete('/buku/{id}', [BukuController::class, 'destroy'])->name('destroy');
+        Route::post('/buku/edit/{id}', [BukuController::class, 'edit'])->name('edit');
+        Route::post('/buku/update/{id}', [BukuController::class, 'update'])->name('update');
 
-Route::delete('/buku/{id}', [BukuController::class, 'destroy'])->name('destroy');
+    });
+});
 
+Auth::routes();
 
-Route::post('/buku/edit/{id}', [BukuController::class, 'edit'])->name('edit');
-Route::post('/buku/update/{id}', [BukuController::class, 'update'])->name('update');
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::get('/buku/search', [BukuController::class, 'search'])->name('search');
+// use App\Http\Controllers\Auth\LoginRegisterController;
+// Route::controller(LoginRegisterController::class)->group(function() {
+//  Route::get('/register', 'register')->name('register');
+//  Route::post('/store', 'store')->name('store');
+//  Route::get('/login', 'login')->name('login');
+//  Route::post('/authenticate', 'authenticate')->name('authenticate');
+//  Route::get('/dashboard', 'dashboard')->name('dashboard');
+//  Route::post('/logout', 'logout')->name('logout');
+// });
