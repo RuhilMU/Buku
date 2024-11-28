@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Buku;
 use App\Models\Gallery;
+use App\Models\Review;
+use App\Models\User;
 use Intervention\Image\Facades\Image;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Storage;
@@ -25,8 +27,10 @@ class BukuController extends Controller
         $data_buku = Buku::paginate($batas);
         $no = $batas * ($data_buku->currentPage()-1);
         $total_harga = Buku::sum('harga');
-
-        return view('index', compact('data_buku','total_harga', 'no','jumlah_buku'));
+        $reviewers = User::where('level', 'internal_reviewer')->get();
+        $tags = Review::select('tags')->distinct()->pluck('tags')->flatten()->unique();
+    
+        return view('index', compact('data_buku', 'jumlah_buku', 'no', 'total_harga', 'reviewers', 'tags'));
     }
     
     public function create()
