@@ -18,4 +18,9 @@ class Buku extends Model
     {
         return $this->hasMany(Gallery::class, 'buku_id', 'id');
     }
+    
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'buku_id', 'id');
+    }
 }
