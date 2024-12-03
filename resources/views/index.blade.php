@@ -54,8 +54,8 @@
             @endforeach
         </div>
     @endif
-
-    <div class="table-responsive mt-4">
+    <h2 class="mt-4">List Buku</h2>
+    <div class="table-responsive mt-3">
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -119,7 +119,7 @@
                     <b>Total Harga:</b>
                 </td>
                 <td colspan="4">
-                    Rp. {{ number_format($total_harga, 2, ',', '.') }}
+                    Rp. {{ number_format($total_harga, 0, ',', '.') }}
                 </td>
             </tr>
         </table>

@@ -30,18 +30,16 @@
             </div>
         @endif
 
-        <div class="d-flex justify-content-between mb-3">
+        <div class="d-flex justify-content-between mb-2">
             <h1>Daftar Buku</h1>
-            @if (Auth::User()->level == 'admin')
-            <a href="{{ route('create')}}" class="btn btn-primary float-end" style=" display:inline; margin-top: 10px; margin-bottom:10px ; float: right;margin-right:10px;">Tambah Buku</a>
-            @endif
         </div>
-
-    <form action="{{ route('search') }}" method="GET">@csrf
-        <input type="text" name="kata" class="form-control" placeholder="Search..." style="width: 30%; display: inline;
-        margin-top: 10px; margin-bottom: 10px; float: right;">
-    </form>
-    <table class="table table-stripped">
+        <form action="{{ route('search') }}" method="GET" class="mb-4">
+            @csrf
+            <div class="input-group">
+                <input type="text" name="kata" class="form-control" placeholder="Search..." style="width: 30%;">
+            </div>
+        </form>
+    <table class="table table-bordered">
         <thead>
             <tr>
                 <th>No</th>
@@ -67,7 +65,17 @@
                     <td>{{ $buku->judul }}</td>
                     <td>{{ $buku->penulis }}</td>
                     <td>{{ $buku->tgl_terbit->format('Y-m-d') }}</td>
-                    <td>{{ "Rp. ".number_format($buku->harga, 0, ',','.') }}</td>
+                    @if($buku->discount)
+                        <td>
+                            <span style="color: red; text-decoration: line-through;">
+                                Rp. {{ number_format($buku->harga, 0, ',', '.') }}
+                            </span> |
+                            <span class="badge bg-success pt-2 pb-2" >{{ $buku->discount_percentage }}% off</span> |
+                            <strong style="color: green">Rp. {{ number_format($buku->discounted_price, 0, ',', '.') }}</strong>
+                        </td>
+                        @else
+                            <td>{{ "Rp. ".number_format($buku->harga, 0, ',','.') }}</td>
+                        @endif
                     @if (Auth::User()->level == 'admin')
                     <td>
                         <a href="{{ route('detail', $buku->id) }}" class="btn btn-primary">Detail</a>

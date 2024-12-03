@@ -21,17 +21,28 @@ class BukuController extends Controller
         
     //     return view('index', compact('data_buku', 'jumlah_buku', 'total_harga'));
     // }
-    public function index(){
+    public function index()
+    {
         $batas = 10;
         $jumlah_buku = Buku::count();
         $data_buku = Buku::paginate($batas);
-        $no = $batas * ($data_buku->currentPage()-1);
-        $total_harga = Buku::sum('harga');
+        $no = $batas * ($data_buku->currentPage() - 1);
+        $total_harga = Buku::all()->reduce(function ($total, $buku) {
+            if ($buku->discount && $buku->discount_percentage) {
+                $harga_setelah_diskon = $buku->harga * ((100 - $buku->discount_percentage) / 100);
+            } else {
+                $harga_setelah_diskon = $buku->harga;
+            }
+            return $total + $harga_setelah_diskon;
+        }, 0);
+    
         $reviewers = User::where('level', 'internal_reviewer')->get();
         $tags = Review::select('tags')->distinct()->pluck('tags')->flatten()->unique();
-        $editorial_picks = Buku::where('editorial_pick',true)->limit(5)->get();
+        $editorial_picks = Buku::where('editorial_pick', true)->limit(5)->get();
+    
         return view('index', compact('data_buku', 'jumlah_buku', 'no', 'total_harga', 'reviewers', 'tags', 'editorial_picks'));
     }
+    
     
     public function create()
     {
