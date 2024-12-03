@@ -29,8 +29,8 @@ class BukuController extends Controller
         $total_harga = Buku::sum('harga');
         $reviewers = User::where('level', 'internal_reviewer')->get();
         $tags = Review::select('tags')->distinct()->pluck('tags')->flatten()->unique();
-    
-        return view('index', compact('data_buku', 'jumlah_buku', 'no', 'total_harga', 'reviewers', 'tags'));
+        $editorial_picks = Buku::where('editorial_pick',true)->limit(5)->get();
+        return view('index', compact('data_buku', 'jumlah_buku', 'no', 'total_harga', 'reviewers', 'tags', 'editorial_picks'));
     }
     
     public function create()
@@ -66,6 +66,9 @@ class BukuController extends Controller
                 'tgl_terbit' => 'required|date',
                 'image' => 'required|file|mimes:jpeg,jpg,png,gif',
                 'gallery_images.*' => 'file|mimes:jpeg,jpg,png,gif',
+                'editorial_pick' => 'boolean',
+                'discount' => 'boolean',
+                'discount_percentage' => 'nullable|integer|min:0|max:100',
             ]);
 
             $imagePath = $request->file('image')->store('public/img');
@@ -77,13 +80,19 @@ class BukuController extends Controller
             $buku->harga = $request->harga;
             $buku->tgl_terbit = $request->tgl_terbit;
             $buku->image = $imageName;
+            $buku->editorial_pick = $request->editorial_pick;
+            $buku->discount = $request->discount;
+            $buku->discount_percentage = $request->discount ? $request->discount_percentage : null;
             $buku->save();
 
             if ($request->hasFile('gallery_images')) {
-                foreach ($request->file('gallery_images') as $image) {
+                foreach ($request->file('gallery_images') as $index => $image) {
                     $galleryPath = $image->store('public/galleries');
+                    $keterangan = $request->gallery_keterangan[$index] ?? null;
+            
                     $buku->galleries()->create([
                         'image' => basename($galleryPath),
+                        'keterangan' => $keterangan,
                     ]);
                 }
             }
@@ -118,46 +127,67 @@ class BukuController extends Controller
 
     public function update(Request $request, $id)
     {
-            $request->validate([
-                'judul' => 'required',
-                'penulis' => 'required',
-                'harga' => 'required|numeric',
-                'tgl_terbit' => 'required|date',
-                'image' => 'mimes:jpeg,jpg,png,gif|nullable',
-                'gallery_images.*' => 'file|mimes:jpeg,jpg,png,gif|nullable',
-            ]);
-        
-            $buku = Buku::find($id);
-            $buku->judul = $request->judul;
-            $buku->penulis = $request->penulis;
-            $buku->harga = $request->harga;
-            $buku->tgl_terbit = $request->tgl_terbit;
-        
-            // Handle the main image (thumbnail)
-            if ($request->hasFile('image')) {
-                if ($buku->image) {
-                    Storage::delete('public/img/' . $buku->image);
-                }
-        
-                $imagePath = $request->file('image')->store('public/img');
-                $imageName = basename($imagePath);
-                $buku->image = $imageName;
+        $request->validate([
+            'judul' => 'required',
+            'penulis' => 'required',
+            'harga' => 'required|numeric',
+            'tgl_terbit' => 'required|date',
+            'image' => 'mimes:jpeg,jpg,png,gif|nullable',
+            'gallery_images.*' => 'file|mimes:jpeg,jpg,png,gif|nullable',
+            'gallery_keterangan_existing.*' => 'nullable|string',
+            'gallery_keterangan.*' => 'nullable|string',
+            'editorial_pick' => 'boolean',
+            'discount' => 'boolean',
+            'discount_percentage' => 'nullable|integer|min:0|max:100',
+        ]);
+    
+        $buku = Buku::find($id);
+        $buku->judul = $request->judul;
+        $buku->penulis = $request->penulis;
+        $buku->harga = $request->harga;
+        $buku->tgl_terbit = $request->tgl_terbit;
+    
+        if ($request->hasFile('image')) {
+            if ($buku->image) {
+                Storage::delete('public/img/' . $buku->image);
             }
-        
-            // Handle gallery images
-            if ($request->hasFile('gallery_images')) {
-                foreach ($request->file('gallery_images') as $image) {
-                    $galleryPath = $image->store('public/galleries');
-                    $buku->galleries()->create([
-                        'image' => basename($galleryPath),
-                    ]);
+    
+            $imagePath = $request->file('image')->store('public/img');
+            $imageName = basename($imagePath);
+            $buku->image = $imageName;
+        }
+    
+        if ($request->filled('gallery_keterangan_existing')) {
+            foreach ($request->gallery_keterangan_existing as $galleryId => $keterangan) {
+                $gallery = $buku->galleries()->find($galleryId);
+                if ($gallery) {
+                    $gallery->keterangan = $keterangan;
+                    $gallery->save();
                 }
             }
-        
-            $buku->save();
+        }
+    
+        if ($request->hasFile('gallery_images')) {
+            foreach ($request->file('gallery_images') as $index => $image) {
+                $galleryPath = $image->store('public/galleries');
+                $keterangan = $request->gallery_keterangan[$index] ?? null;
+    
+                $buku->galleries()->create([
+                    'image' => basename($galleryPath),
+                    'keterangan' => $keterangan,
+                ]);
+            }
+        }
+    
+        $buku->editorial_pick = $request->editorial_pick;
+        $buku->discount = $request->discount;
+        $buku->discount_percentage = $request->discount ? $request->discount_percentage : null;
 
-    return redirect('/buku')->with('pesanupdate', 'Data Buku Berhasil di Update');
+        $buku->save();
+    
+        return redirect('/buku')->with('pesanupdate', 'Data Buku Berhasil di Update');
     }
+    
 
     public function search(Request $request)
     {
