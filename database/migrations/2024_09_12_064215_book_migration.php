@@ -15,7 +15,10 @@ return new class extends Migration
             $table->integer('harga');
             $table->date('tgl_terbit');
             $table->string('image')->nullable();
+            $table->boolean('editorial_pick')->default(false);
             $table->timestamps();
+            $table->boolean('discount')->default(false);
+            $table->integer('discount_percentage')->nullable();
         });
     }
 

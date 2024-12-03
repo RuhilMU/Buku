@@ -16,6 +16,7 @@ return new class extends Migration
         $table->unsignedBigInteger('buku_id');
         $table->foreign('buku_id')->references('id')->on('books');
         $table->string('image');
+        $table->string('keterangan');
         $table->timestamps();
     });
     }

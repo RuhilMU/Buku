@@ -23,21 +23,39 @@
         </div>
     @endif
 
-    <div class="d-flex justify-content-between mb-3">
+    <div class="mb-3">
         <h1>Daftar Buku</h1>
         @if (Auth::User()->level == 'admin')
-            <a href="{{ route('buku.create')}}" class="btn btn-primary float-end mt-5">Tambah Buku</a>
+            <a href="{{ route('buku.create')}}" class="btn btn-primary">Tambah Buku</a>
         @endif
     </div>
 
-    <form action="{{ route('search') }}" method="GET" class="mb-3">
+    <form action="{{ route('search') }}" method="GET" class="mb-4">
         @csrf
         <div class="input-group">
             <input type="text" name="kata" class="form-control" placeholder="Search..." style="width: 30%;">
         </div>
     </form>
 
-    <div class="table-responsive">
+    @if($editorial_picks->isNotEmpty())
+        <h2>✰ Editorial Picks ✰</h2>
+        <div class="row">
+            @foreach($editorial_picks as $book)
+                <div class="col-md-3">
+                    <div class="card">
+                        <img src="{{ asset('storage/img/'.$book->image) }}" class="card-img-top" alt="{{ $book->judul }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ $book->judul }}</h5>
+                            <p class="card-text">{{ $book->penulis }}</p>
+                            <a href="{{ route('detail', $book->id) }}" class="btn btn-primary">Detail</a>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @endif
+    <h2 class="mt-4">List Buku</h2>
+    <div class="table-responsive mt-3">
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -50,6 +68,8 @@
                     <th>Harga</th>
                     @if (Auth::User()->level == 'admin')
                         <th>Aksi</th>
+                    @else
+                        <th>Info</th>
                     @endif
                 </tr>
             </thead>
@@ -63,8 +83,18 @@
                         </td>
                         <td>{{ $buku->judul }}</td>
                         <td>{{ $buku->penulis }}</td>
-                        <td>{{ $buku->tgl_terbit->format('Y-m-d') }}</td>
-                        <td>{{ "Rp. ".number_format($buku->harga, 0, ',','.') }}</td>
+                        <td>{{ $buku->tgl_terbit->format('d F Y') }}</td>
+                        @if($buku->discount)
+                        <td>
+                            <span style="color: red; text-decoration: line-through;">
+                                Rp. {{ number_format($buku->harga, 0, ',', '.') }}
+                            </span> |
+                            <span class="badge bg-success pt-2 pb-2" >{{ $buku->discount_percentage }}% off</span> |
+                            <strong style="color: green">Rp. {{ number_format($buku->discounted_price, 0, ',', '.') }}</strong>
+                        </td>
+                        @else
+                            <td>{{ "Rp. ".number_format($buku->harga, 0, ',','.') }}</td>
+                        @endif
                         @if (Auth::User()->level == 'admin')
                             <td>
                                 <a href="{{ route('detail', $buku->id) }}" class="btn btn-primary btn-sm">Detail</a>
@@ -89,7 +119,7 @@
                     <b>Total Harga:</b>
                 </td>
                 <td colspan="4">
-                    Rp. {{ number_format($total_harga, 2, ',', '.') }}
+                    Rp. {{ number_format($total_harga, 0, ',', '.') }}
                 </td>
             </tr>
         </table>
